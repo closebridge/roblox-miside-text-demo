@@ -91,7 +91,6 @@ function displayText2D(prepTable: PrepTable, textArray: table)
 	textContainer.Name = "textContainer"
 	
 	-- Formatting text
-	-- TODO: Add more flexibility to create text's color style (For now it's using gradient_ungroup_0)
 	if not prepTable.Gradient then
 		__gradient.Color = ColorSequence.new({
 			ColorSequenceKeypoint.new(0, Color3.new(0.768627, 0.321569, 0.443137)),
@@ -118,7 +117,7 @@ function displayText2D(prepTable: PrepTable, textArray: table)
 	__text.Position = UDim2.new(0.01, 0,0, 0)
 	__text.Size = UDim2.new(0.979, 0, 0.346, 0) -- TODO: Dynamically change size of container's size if the text is long
 	__text.Font = Enum.Font.Roboto
-	__text.FontFace = Font.new('rbxasset://fonts/families/Roboto.json', Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+	__text.FontFace = Font.new('rbxasset://fonts/families/Roboto.json', Enum.FontWeight.Heavy, Enum.FontStyle.Normal)
 
 	__text.Name = 'currentText'
 	__text.TextWrapped = true
@@ -373,6 +372,52 @@ function displayText3D(prepTable: PrepTable, textArray: table, breakLocation: ta
 	local previousTextMesh: Instance
 	local cachedTextMesh: table = {}
 	local textFitX: number = 0
+	local justBreakLine: boolean = false
+
+	local highlight = Instance.new('Highlight')
+	highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+	highlight.FillTransparency = 1
+	highlight.OutlineColor = Color3.new(255,255,255)
+	highlight.OutlineTransparency = 0
+	
+	local innerGradientTextContainer = Instance.new("SurfaceGui")
+	local innerFrame = Instance.new("Frame")
+	local gradientText = Instance.new("TextLabel")
+	local gradient = Instance.new("UIGradient")
+
+	innerGradientTextContainer.Face = Enum.NormalId.Front
+	innerGradientTextContainer.CanvasSize = Vector2.new(50,50)
+	innerGradientTextContainer.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+
+	innerFrame.BackgroundTransparency = 1
+	innerFrame.Position = UDim2.new(-0.275, 0,-0.25, 0)
+	innerFrame.Size = UDim2.new(1.55, 0, 1.55, 0)
+	innerFrame.BorderSizePixel = 0
+
+	gradientText.Position = UDim2.new(0,0,0,0)
+	gradientText.Size = UDim2.new(1,0,1,0)
+	gradientText.BackgroundTransparency = 1
+	gradientText.BorderSizePixel = 0
+	gradientText.RichText = true
+	gradientText.TextColor3 = Color3.new(1,1,1)
+	gradientText.TextScaled = true
+	gradientText.TextXAlignment = Enum.TextXAlignment.Center
+	gradientText.TextYAlignment = Enum.TextYAlignment.Center
+	gradientText.Font = Enum.Font.Roboto
+	gradientText.FontFace = Font.new('rbxasset://fonts/families/Roboto.json', Enum.FontWeight.Heavy, Enum.FontStyle.Normal)
+
+	if not prepTable.Gradient then
+		gradient.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.new(0.768627, 0.321569, 0.443137)),
+			ColorSequenceKeypoint.new(1, Color3.new(0.427451, 0.494118, 0.784314))
+		})
+	else
+		gradient.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.new(prepTable.Gradient.ColorSequence1)),
+			ColorSequenceKeypoint.new(1, Color3.new(prepTable.Gradient.ColorSequence2))
+		})
+	end
+	gradient.Rotation = 90
 
 	while i <= #textArray do
 		task.wait(prepTable.AppearSpeed)
@@ -414,53 +459,80 @@ function displayText3D(prepTable: PrepTable, textArray: table, breakLocation: ta
 			lineNest = newLineNest
 			textFitX = 0
 			setLTSCount(lineNest) -- FIX: Text not properly aligned center
+			justBreakLine = true
 		else
 			-- print('no breakline')
 		end
+
 
 		lineNest.Name = lineNest.Name .. textArray[i]
 		currentTextMesh = currentTextMesh:Clone()
 		currentTextMesh.Name = textArray[i] .. i
 
-		if i == 1 then
-			currentTextMesh.Position = Vector3.new(
-				-- prepTable.flatTextLocation.Position.X + prepTable.textXGap,
-				lineNest.Position.X,
-				lineNest.Position.Y,
-				lineNest.Position.Z
-			)
-		else
-			currentTextMesh.Position = Vector3.new(
-				-- prepTable.flatTextLocation.Position.X + prepTable.textXGap,
-				previousTextMesh.Position.X + currentTextMesh.Size.X + prepTable.textXGap,
+		local Localhighlight = highlight:Clone()
+		local localIGTC = innerGradientTextContainer:Clone()
+		local localGradient = gradient:Clone()
+		local localFrame = innerFrame:Clone()
+		local localText = gradientText:Clone()
 
-				lineNest.Position.Y,
-				lineNest.Position.Z
-			)
+		if textArray[i] == string.lower(textArray[i]) then -- TODO: Fix incorrect lowercase text's gradient text
+			localText.Position = UDim2.new(-0.25, 0, -0.32, 0)
+			localText.Size = UDim2.new(1.5, 0, 1.45, 0)
 		end
+
+		localText.Text = textArray[i]
+
 		
+		if not justBreakLine then
+			if i == 1 then
+				currentTextMesh.Position = Vector3.new(
+					-- prepTable.flatTextLocation.Position.X + prepTable.textXGap,
+					lineNest.Position.X,
+					lineNest.Position.Y,
+					lineNest.Position.Z
+				)
+			else
+				currentTextMesh.Position = Vector3.new(
+					-- prepTable.flatTextLocation.Position.X + prepTable.textXGap,
+					previousTextMesh.Position.X + currentTextMesh.Size.X + prepTable.textXGap,
+	
+					lineNest.Position.Y,
+					lineNest.Position.Z
+				)
+			end
+			i += 1
+		else
+			justBreakLine = false
+			i -= 1
+		end
+
+		
+
 		textFitX = textFitX + (currentTextMesh.Size.X + prepTable.textXGap)
 		previousTextMesh = currentTextMesh
 		currentTextMesh.Parent = lineNest
-		i += 1
+		localIGTC.Parent = currentTextMesh
+		Localhighlight.Parent = currentTextMesh
+		localFrame.Parent = localIGTC
+		localText.Parent = localFrame
+		localGradient.Parent = localText
 	end
 
 	task.wait(3) -- TODO: Make this dynamically change based on text length
 	
-	-- TODO: Make text fell with EndStyle
-	for i0, value in ipairs(lineSeparatorTable) do
-		task.wait(prepTable.AppearSpeed)
-		local vLST = lineSeparatorTable[i0]:GetChildren()
-		for i1, innerLSTValue in ipairs(vLST) do
-			task.wait(prepTable.AppearSpeed)
-			innerLSTValue.Anchored = false
-		end
-	end
+	-- for i0, value in ipairs(lineSeparatorTable) do
+	-- 	task.wait(prepTable.AppearSpeed)
+	-- 	local vLST = lineSeparatorTable[i0]:GetChildren()
+	-- 	for i1, innerLSTValue in ipairs(vLST) do
+	-- 		task.wait(prepTable.AppearSpeed)
+	-- 		innerLSTValue.Anchored = false
+	-- 	end
+	-- end
 end
 
 
 main({
-	Text = "AAAaaaaAAAAAA",
+	Text = "AAAaaaaAAAAAAaaAAAbC",
 	-- Gradient = {
 	-- 	Gradient1 = {0.768627, 0.321569, 0.443137},
 	-- 	Gradient2 = {0.427451, 0.494118, 0.784314}
@@ -475,3 +547,8 @@ main({
 	EndStyle = 0,
 	flatTextLocation = workspace:WaitForChild('flatTextLocation_Test')
 })
+
+-- TODO:
+-- Make 3D breakline-d text align center when append text mesh
+-- Add more missing meshes
+-- Fix some lowercase text behave stupid...
