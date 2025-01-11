@@ -221,7 +221,7 @@ function displayText2D(prepTable: PrepTable, textArray: table)
 	return breakLocation
 end
 
-function displayText3D(prepTable: PrepTable, textArray: table, breakLocation: table)
+function displayText3D(prepTable: PrepTable, textArray: table)
 	-- Strat:
 
 	-- 1. Duplicate 3D text from table
@@ -231,13 +231,16 @@ function displayText3D(prepTable: PrepTable, textArray: table, breakLocation: ta
 	-- 2: Apply physics slowly (from start to end) (EndStyle)
 
 	if not prepTable.flatTextLocation then
-		error("prepTable components not met the requirement.")
-	elseif #breakLocation == 0 then
-		warn('breakLocation empty, text mesh will dynamically add \"n on flatTextLocations brickSize')
-		breakLocation = false
+		error("prepTable.flatTextLocation not met the requirement.")
+	-- elseif #breakLocation == 0 then
+	-- 	warn('breakLocation empty, text mesh will dynamically add newline on flatTextLocations brickSize')
 	end
 
 	local flatTextLocation = prepTable.flatTextLocation
+	flatTextLocation.Anchored = true
+	flatTextLocation.CanCollide = false
+	flatTextLocation.CanTouch = false
+
 	local textMeshNest = workspace:WaitForChild('textRepo')
 	local textMeshStorage = {
 		["A"] = textMeshNest.uppercase:WaitForChild("Meshes_up__A"),
@@ -343,13 +346,6 @@ function displayText3D(prepTable: PrepTable, textArray: table, breakLocation: ta
 		[" "] = textMeshNest.symbol.Meshes__whitespace
 	}
 
-	local lineSeparatorTable: table = {}
-	local lstCount = 1
-	local setLTSCount = function(lineNest)
-		lineSeparatorTable[lstCount] = lineNest
-		lstCount += 1
-	end
-
 	local lineNest: Instance
 	local function newLineNest()
 		lineNest = Instance.new('Part')
@@ -364,15 +360,15 @@ function displayText3D(prepTable: PrepTable, textArray: table, breakLocation: ta
 	end
 	
 	newLineNest()
-	setLTSCount(lineNest)
+	-- setLTSCount(lineNest)
 
 	
 	print(#textArray)
 	local i = 1
-	local previousTextMesh: Instance
 	local cachedTextMesh: table = {}
-	local textFitX: number = 0
-	local justBreakLine: boolean = false
+	local previousTextMesh: Instance
+	-- local textFitX: number = 0
+	-- local justBreakLine: table = {false, false}
 
 	local highlight = Instance.new('Highlight')
 	highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
@@ -438,7 +434,7 @@ function displayText3D(prepTable: PrepTable, textArray: table, breakLocation: ta
 			end
 		end)
 		if not success then
-			print('cache failed to save instance ❌\n\n' .. fail)
+			error('cache failed to save instance ❌\n\n' .. fail)
 		end
 
 		-- print('\n\n')
@@ -446,27 +442,30 @@ function displayText3D(prepTable: PrepTable, textArray: table, breakLocation: ta
 		-- print(textArray[i])
 		-- print('\n\n')
 
-		local breakLocResult, _ = pcall(function()
-			return breakLocation[i]
-		end)
+		-- local breakLocResult, _ = pcall(function()
+		-- 	return breakLocation[i]
+		-- end)
 
 		-- print("textFitX: " .. textFitX)
 		-- print("flatTextLocation " .. flatTextLocation.Size.X)
-		if breakLocResult or textFitX >= flatTextLocation.Size.X then
-			local oldLineNest: Instance = lineNest
-			local newLineNest: Instance = newLineNest()
-			newLineNest.Position = Vector3.new(oldLineNest.Position.X, oldLineNest.Position.Y - (oldLineNest.Size.Y + prepTable.textYGap), oldLineNest.Position.Z)
-			lineNest = newLineNest
-			textFitX = 0
-			setLTSCount(lineNest) -- FIX: Text not properly aligned center
-			justBreakLine = true
-		else
-			-- print('no breakline')
-		end
+		-- if breakLocResult or textFitX >= flatTextLocation.Size.X then
+		-- 	local oldLineNest: Instance = lineNest
+		-- 	local newLineNest: Instance = newLineNest()
+		-- 	newLineNest.Position = Vector3.new(oldLineNest.Position.X, oldLineNest.Position.Y - (oldLineNest.Size.Y + prepTable.textYGap), oldLineNest.Position.Z)
+		-- 	lineNest = newLineNest
+		-- 	textFitX = 0
+		-- 	setLTSCount(lineNest)
+		-- 	justBreakLine[1] = true
+		-- 	justBreakLine[2] = true
+		-- 	print('newline added')
+		-- end
 
 
 		lineNest.Name = lineNest.Name .. textArray[i]
 		currentTextMesh = currentTextMesh:Clone()
+		currentTextMesh.Anchored = true
+		currentTextMesh.CanCollide = false
+		currentTextMesh.CanTouch = false
 		currentTextMesh.Name = textArray[i] .. i
 
 		local Localhighlight = highlight:Clone()
@@ -483,33 +482,41 @@ function displayText3D(prepTable: PrepTable, textArray: table, breakLocation: ta
 		localText.Text = textArray[i]
 
 		
-		if not justBreakLine then
-			if i == 1 then
-				currentTextMesh.Position = Vector3.new(
-					-- prepTable.flatTextLocation.Position.X + prepTable.textXGap,
-					lineNest.Position.X,
-					lineNest.Position.Y,
-					lineNest.Position.Z
-				)
-			else
-				currentTextMesh.Position = Vector3.new(
-					-- prepTable.flatTextLocation.Position.X + prepTable.textXGap,
-					previousTextMesh.Position.X + currentTextMesh.Size.X + prepTable.textXGap,
-	
-					lineNest.Position.Y,
-					lineNest.Position.Z
-				)
-			end
-			i += 1
+
+		if i == 1 then
+			currentTextMesh.Position = Vector3.new(
+				-- prepTable.flatTextLocation.Position.X + prepTable.textXGap,
+				lineNest.Position.X,
+				lineNest.Position.Y,
+				lineNest.Position.Z
+			)
 		else
-			justBreakLine = false
-			i -= 1
+			currentTextMesh.Position = Vector3.new(
+				-- prepTable.flatTextLocation.Position.X + prepTable.textXGap,
+				previousTextMesh.Position.X + currentTextMesh.Size.X + prepTable.textXGap,
+
+				lineNest.Position.Y,
+				lineNest.Position.Z
+			)
 		end
+		i += 1
 
-		
 
-		textFitX = textFitX + (currentTextMesh.Size.X + prepTable.textXGap)
+		-- print(justBreakLine[1], justBreakLine[2])
+		-- if justBreakLine[2] then
+		-- 	print(lineNest)
+		-- 	lineNest.Position = Vector3.new(
+		-- 		lineNest.Position.X - currentTextMesh.Size.X,
+		-- 		lineNest.Position.Y,
+		-- 		lineNest.Position.Z
+		-- 	)
+		-- elseif justBreakLine[1] then
+		-- 	justBreakLine[2] = true
+		-- end
+
+		-- textFitX = textFitX + (currentTextMesh.Size.X + prepTable.textXGap) 
 		previousTextMesh = currentTextMesh
+
 		currentTextMesh.Parent = lineNest
 		localIGTC.Parent = currentTextMesh
 		Localhighlight.Parent = currentTextMesh
@@ -518,18 +525,28 @@ function displayText3D(prepTable: PrepTable, textArray: table, breakLocation: ta
 		localGradient.Parent = localText
 	end
 
-	task.wait(3) -- TODO: Make this dynamically change based on text length
+	task.wait(#textArray * 0.07)
 	
-	-- for i0, value in ipairs(lineSeparatorTable) do
-	-- 	task.wait(prepTable.AppearSpeed)
-	-- 	local vLST = lineSeparatorTable[i0]:GetChildren()
-	-- 	for i1, innerLSTValue in ipairs(vLST) do
-	-- 		task.wait(prepTable.AppearSpeed)
-	-- 		innerLSTValue.Anchored = false
-	-- 	end
-	-- end
+	local innerTextLineNest = lineNest:GetChildren()
+	for i1, innerLSTValue in ipairs(innerTextLineNest) do
+		-- TODO: Add EndStyle
+		task.wait(prepTable.AppearSpeed)
+		innerLSTValue.Anchored = false
+		innerLSTValue.CanCollide = true
+		innerLSTValue.CanTouch = true
+	end
+
+
+
+	return true
 end
 
+function textAnimateHandler(animateStyle: table ,textItem: Instance)
+	-- Determine if the text is 2D/3D
+	-- Handle both Appear/End animations
+	-- Returns true/false
+	
+end
 
 main({
 	Text = "AAAaaaaAAAAAAaaAAAbC",
@@ -549,6 +566,11 @@ main({
 })
 
 -- TODO:
--- Make 3D breakline-d text align center when append text mesh
+-- ...Do we need newline text? I swear I watched the replay and there were NO sign of newline text. They just create a new instance of the function to simulate newline.
+-- At least in 3D text generation, 2D does have some sort of newline system
+
 -- Add more missing meshes
 -- Fix some lowercase text behave stupid...
+-- Fix textRepo somehow got affected with the loop (check cache)
+-- Animation for AppearStyle
+-- Animation for EndStyle, Destroy() mesh after being dropped

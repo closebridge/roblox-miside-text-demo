@@ -1,6 +1,7 @@
 # MiSide Text Style Demo on Roblox
 -Oh joy
--*me, 2025, underestimating on how hard this is going to be*
+<br>
+-*me, 2025, underestimating on how hard this is going to be*<br>
 ** This project is not intended for long term ~~development~~ (more like maintaining). Overall, I'm just slacking off away from my huge project.
 
 (c) lua implentation by me, feel free to copy/modify, but at least give me creds (i want to decorate my resume)
