@@ -1,4 +1,4 @@
-print("Running")
+print("Running") -- Running
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local Workspace = game:GetService("Workspace")
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -8,7 +8,7 @@ local textSize = 40 -- TODO: Add ability to dynamically change text size based o
 -- Strategies: 
 
 
--- 0: Display, format, render, text in 2D on user's screen 
+-- 0: Display, format, render text in 2D on user's screen 
 -- (Fixed if Placement is 0) (DON'T USE 2D TEXT IF NOT 0)
 -- (Must add text piece by piece, or else the 4th step would be impossible)
 
@@ -33,11 +33,11 @@ type PrepTable = {
 	textXGap: number?,
 	textYGap: number?,
 
-	-- 0: Normal (on sine), 1: Crazy, 2: Creepy, 3...
+	-- 0: Normal (on sine), 1: Shaky, 2: Shrinking
 	AppearStyle: number,
-	AppearSpeed: number | nil,
+	AnimationTiming: number | nil,
 
-	-- 0: Normal, 1: Explode, 2: Gradually, 3...
+	-- 0: Normal, 1: Explode
 	EndStyle: number,
 	flatTextLocation: Instance
 
@@ -53,8 +53,8 @@ function main(input: PrepTable)
 	end
 	local breakupText = separateText(input.Text)
 		
-	if not input.AppearSpeed then
-		input.AppearSpeed = 0.03
+	if not input.AnimationTiming then
+		input.AnimationTiming = 0.03
 	end
 
 	displayText3D(input, breakupText, {})
@@ -176,7 +176,7 @@ function displayText2D(prepTable: PrepTable, textArray: table)
 		local i = 1
 		local textFitCheck
 		while i <= #textArray do
-			task.wait(prepTable.AppearSpeed)
+			task.wait(prepTable.AnimationTiming)
 			print(i, textArray[i])
 			currentTextTest.Text = currentTextTest.Text .. textArray[i]
 			textFitCheck = currentTextTest.TextFits
@@ -356,9 +356,11 @@ function displayText3D(prepTable: PrepTable, textArray: table)
 		lineNest.CanTouch = false
 		lineNest.Transparency = 1
 		lineNest.Position = Vector3.new(flatTextLocation.Position.X - (flatTextLocation.Size.X / 2), flatTextLocation.Position.Y, flatTextLocation.Position.Z)
+		-- lineNest.Orientation = Vector3.new(flatTextLocation.Orientation.X, flatTextLocation.Orientation.Y, flatTextLocation.Orientation.Z)
+		
 		return lineNest
 	end
-	
+
 	newLineNest()
 	-- setLTSCount(lineNest)
 
@@ -415,9 +417,8 @@ function displayText3D(prepTable: PrepTable, textArray: table)
 	end
 	gradient.Rotation = 90
 
+	print(prepTable.AnimationTiming)
 	while i <= #textArray do
-		task.wait(prepTable.AppearSpeed)
-
 		local currentTextMesh: Instance
 		local success, fail = pcall(function()
 			if cachedTextMesh[textArray[i]] then
@@ -481,8 +482,6 @@ function displayText3D(prepTable: PrepTable, textArray: table)
 
 		localText.Text = textArray[i]
 
-		
-
 		if i == 1 then
 			currentTextMesh.Position = Vector3.new(
 				-- prepTable.flatTextLocation.Position.X + prepTable.textXGap,
@@ -499,24 +498,14 @@ function displayText3D(prepTable: PrepTable, textArray: table)
 				lineNest.Position.Z
 			)
 		end
+		
+		-- Make them invisible, as we want to use textAnimateHandler to handle the animation
+		-- currentTextMesh.Transparency = 1
+		-- localIGTC.Enabled = false
+
 		i += 1
 
-
-		-- print(justBreakLine[1], justBreakLine[2])
-		-- if justBreakLine[2] then
-		-- 	print(lineNest)
-		-- 	lineNest.Position = Vector3.new(
-		-- 		lineNest.Position.X - currentTextMesh.Size.X,
-		-- 		lineNest.Position.Y,
-		-- 		lineNest.Position.Z
-		-- 	)
-		-- elseif justBreakLine[1] then
-		-- 	justBreakLine[2] = true
-		-- end
-
-		-- textFitX = textFitX + (currentTextMesh.Size.X + prepTable.textXGap) 
 		previousTextMesh = currentTextMesh
-
 		currentTextMesh.Parent = lineNest
 		localIGTC.Parent = currentTextMesh
 		Localhighlight.Parent = currentTextMesh
@@ -525,27 +514,83 @@ function displayText3D(prepTable: PrepTable, textArray: table)
 		localGradient.Parent = localText
 	end
 
-	task.wait(#textArray * 0.07)
-	
-	local innerTextLineNest = lineNest:GetChildren()
-	for i1, innerLSTValue in ipairs(innerTextLineNest) do
-		-- TODO: Add EndStyle
-		task.wait(prepTable.AppearSpeed)
-		innerLSTValue.Anchored = false
-		innerLSTValue.CanCollide = true
-		innerLSTValue.CanTouch = true
-	end
+	local fTLOrienationX, fTLOrienationY, fTLOrienationZ = flatTextLocation:GetPivot():ToOrientation()
+	lineNest:PivotTo(
+		CFrame.new(lineNest.Position) * CFrame.Angles(
+			fTLOrienationX,
+			fTLOrienationY,
+			fTLOrienationZ
+		)
+	)
 
+	textAnimateHandler({prepTable.AppearStyle, prepTable.EndStyle, #textArray * 0.07, prepTable.AnimationTiming}, lineNest:GetChildren())
 
-
-	return true
+	-- return true
 end
 
-function textAnimateHandler(animateStyle: table ,textItem: Instance)
-	-- Determine if the text is 2D/3D
-	-- Handle both Appear/End animations
-	-- Returns true/false
+
+-- Strats:
+-- 1. call textAnimateHandler once texts are being aligned properly (desync)
+-- 2. Perform various AppearStyle/EndStyle
+function textAnimateHandler(animateData: table ,textItem: table) -- TODO: Convert to ModuleScript
+	-- animateData: { AppearStyle, EndStyle, timeBetweenStyle, animationTiming }
+	-- AppearStyle = 0: Normal (on sine), 1: Shaky, 2: Shrinking
+	-- EndStyle = 0: Normal, 1: Explode
+
+
 	
+	-- local animateRepo: table = {
+	-- 	AppearStyle = {
+	-- 		{TweenInfo.new(
+
+	-- 		)}
+	-- 	},
+	-- 	EndStyle = {
+
+	-- 	}
+	-- }
+
+
+	local tweenService = game:GetService("TweenService")
+	local textItemState = function(item) -- 0: 2D, 1: 3D
+		if item[1]:IsA("TextLabel") then
+			return 0
+		elseif item[1]:IsA("MeshPart") then
+			return 1
+		else
+			error('unexpected item in item @ textItemState (check if GetChildren() is included)')
+			return -1
+		end
+	end
+
+	print(animateData, textItem)
+
+	local normalStyle = TweenInfo.new(
+		animateData[4],
+		Enum.EasingStyle.Quart,
+		Enum.EasingDirection.Out,
+		0,
+		false,
+		0
+	)
+	if animateData[1] == 0 then
+		for _, mesh: Instance in textItem do
+			task.wait(animateData[4])
+			local x, y, z = mesh.CFrame:ToOrientation()
+			mesh.CFrame = CFrame.new(mesh.CFrame.Position.X, mesh.CFrame.Position.Y + 0.5, mesh.CFrame.Position.Z) * CFrame.Angles(x,y,z - 0.2)
+		end
+	end -- TODO: Apply TweenService for animation (movement, visual)
+
+	task.wait(animateData[3]) -- Time between AppearStyle and EndStyle
+	if animateData[2] == 0 then
+		local innerTextLineNest = textItem
+		for i1, innerLSTValue in ipairs(innerTextLineNest) do
+			task.wait(animateData[4])
+			innerLSTValue.Anchored = false
+			innerLSTValue.CanCollide = true
+			innerLSTValue.CanTouch = false
+		end
+	end
 end
 
 main({
@@ -558,7 +603,7 @@ main({
 	Placement = 2,
 	Character = 'Player',
 	AppearStyle = 0,
-	AppearSpeed = 0.1, -- The default is 0.03
+	AnimationTiming = 0.1, -- The default is 0.03
 	textXGap = 0.2,
 	textYGap = 0.5,
 	EndStyle = 0,
