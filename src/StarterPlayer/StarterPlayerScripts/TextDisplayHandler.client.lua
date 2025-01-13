@@ -2,6 +2,7 @@ print("Running") -- Running
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local Workspace = game:GetService("Workspace")
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local textChatService = game:GetService("TextChatService")
 
 local textSize = 40 -- TODO: Add ability to dynamically change text size based on length of the text
 
@@ -15,8 +16,6 @@ local textSize = 40 -- TODO: Add ability to dynamically change text size based o
 -- 1: Format, append 3D mesh text to target
 -- (Fixed to player's screen (move, rotation, facing direction) until EndStyle)
 -- 2: Apply physics slowly (from start to end) (EndStyle)
-
-local mainText = workspace.textRepo
 
 type PrepTable = {
 	Text: string,
@@ -51,10 +50,10 @@ function main(input: PrepTable)
 		end
 		return result
 	end
-	local breakupText = separateText(input.Text)
+	local breakupText = separateText(string.upper(input.Text))
 		
 	if not input.AnimationTiming then
-		input.AnimationTiming = 0.03
+		input.AnimationTiming = 0.01
 	end
 
 	displayText3D(input, breakupText, {})
@@ -244,59 +243,59 @@ function displayText3D(prepTable: PrepTable, textArray: table)
 	local textMeshNest = workspace:WaitForChild('textRepo')
 	local textMeshStorage = {
 		["A"] = textMeshNest.uppercase:WaitForChild("Meshes_up__A"),
-		-- ["B"] = textMeshNest.uppercase:WaitForChild("Meshes_up__B"),
+		["B"] = textMeshNest.uppercase:WaitForChild("Meshes_up__B"),
 		["C"] = textMeshNest.uppercase:WaitForChild("Meshes_up__C"),
-		-- ["D"] = textMeshNest.uppercase:WaitForChild("Meshes_up__D"),
-		-- ["E"] = textMeshNest.uppercase:WaitForChild("Meshes_up__E"),
+		["D"] = textMeshNest.uppercase:WaitForChild("Meshes_up__D"),
+		["E"] = textMeshNest.uppercase:WaitForChild("Meshes_up__E"),
 		["F"] = textMeshNest.uppercase:WaitForChild("Meshes_up__F"),
-		-- ["G"] = textMeshNest.uppercase:WaitForChild("Meshes_up__G"),
+		["G"] = textMeshNest.uppercase:WaitForChild("Meshes_up__G"),
 		["H"] = textMeshNest.uppercase:WaitForChild("Meshes_up__H"),
-		-- ["I"] = textMeshNest.uppercase:WaitForChild("Meshes_up__I"),
-		-- ["J"] = textMeshNest.uppercase:WaitForChild("Meshes_up__J"),
+		["I"] = textMeshNest.uppercase:WaitForChild("Meshes_up__I"),
+		["J"] = textMeshNest.uppercase:WaitForChild("Meshes_up__J"),
 		["K"] = textMeshNest.uppercase:WaitForChild("Meshes_up__K"),
 		["L"] = textMeshNest.uppercase:WaitForChild("Meshes_up__L"),
 		["M"] = textMeshNest.uppercase:WaitForChild("Meshes_up__M"),
-		-- ["N"] = textMeshNest.uppercase:WaitForChild("Meshes_up__N"),
-		-- ["O"] = textMeshNest.uppercase:WaitForChild("Meshes_up__O"),
-		-- ["P"] = textMeshNest.uppercase:WaitForChild("Meshes_up__P"),
-		-- ["Q"] = textMeshNest.uppercase:WaitForChild("Meshes_up__Q"),
-		-- ["R"] = textMeshNest.uppercase:WaitForChild("Meshes_up__R"),
-		-- ["S"] = textMeshNest.uppercase:WaitForChild("Meshes_up__S"),
-		-- ["T"] = textMeshNest.uppercase:WaitForChild("Meshes_up__T"),
-		-- ["U"] = textMeshNest.uppercase:WaitForChild("Meshes_up__U"),
-		-- ["V"] = textMeshNest.uppercase:WaitForChild("Meshes_up__V"),
+		["N"] = textMeshNest.uppercase:WaitForChild("Meshes_up__N"),
+		["O"] = textMeshNest.uppercase:WaitForChild("Meshes_up__O"),
+		["P"] = textMeshNest.uppercase:WaitForChild("Meshes_up__P"),
+		["Q"] = textMeshNest.uppercase:WaitForChild("Meshes_up__Q"),
+		["R"] = textMeshNest.uppercase:WaitForChild("Meshes_up__R"),
+		["S"] = textMeshNest.uppercase:WaitForChild("Meshes_up__S"),
+		["T"] = textMeshNest.uppercase:WaitForChild("Meshes_up__T"),
+		["U"] = textMeshNest.uppercase:WaitForChild("Meshes_up__U"),
+		["V"] = textMeshNest.uppercase:WaitForChild("Meshes_up__V"),
 		["W"] = textMeshNest.uppercase:WaitForChild("Meshes_up__W"),
-		-- ["X"] = textMeshNest.uppercase:WaitForChild("Meshes_up__X"),
-		-- ["Y"] = textMeshNest.uppercase:WaitForChild("Meshes_up__Y"),
+		["X"] = textMeshNest.uppercase:WaitForChild("Meshes_up__X"),
+		["Y"] = textMeshNest.uppercase:WaitForChild("Meshes_up__Y"),
 		["Z"] = textMeshNest.uppercase:WaitForChild("Meshes_up__Z"),
 
 
-		["a"] = textMeshNest.lowercase.Meshes_low__a,
-		["b"] = textMeshNest.lowercase.Meshes_low__b,
-		-- ["c"] = textMeshNest.lowercase.Meshes_low__c,
-		["d"] = textMeshNest.lowercase.Meshes_low__d,
-		["e"] = textMeshNest.lowercase.Meshes_low__e,
-		-- ["f"] = textMeshNest.lowercase.Meshes_low__f,
-		["g"] = textMeshNest.lowercase.Meshes_low__g,
-		-- ["h"] = textMeshNest.lowercase.Meshes_low__h,
-		["i"] = textMeshNest.lowercase.Meshes_low__i,
-		["j"] = textMeshNest.lowercase.Meshes_low__j,
-		-- ["k"] = textMeshNest.lowercase.Meshes_low__k,
-		["l"] = textMeshNest.lowercase.Meshes_low__l,
-		-- ["m"] = textMeshNest.lowercase.Meshes_low__m,
-		["n"] = textMeshNest.lowercase.Meshes_low__n,
-		["o"] = textMeshNest.lowercase.Meshes_low__o,
-		-- ["p"] = textMeshNest.lowercase.Meshes_low__p,
-		["q"] = textMeshNest.lowercase.Meshes_low__q,
-		-- ["r"] = textMeshNest.lowercase.Meshes_low__r,
-		["s"] = textMeshNest.lowercase.Meshes_low__s,
-		["t"] = textMeshNest.lowercase.Meshes_low__t,
-		-- ["u"] = textMeshNest.lowercase.Meshes_low__u,
-		["v"] = textMeshNest.lowercase.Meshes_low__v,
-		-- ["w"] = textMeshNest.lowercase.Meshes_low__w,
-		["x"] = textMeshNest.lowercase.Meshes_low__x,
-		["y"] = textMeshNest.lowercase.Meshes_low__y,
-		-- ["z"] = textMeshNest.lowercase.Meshes_low__z,
+		["a"] = textMeshNest.lowercase:WaitForChild("Meshes_low__a"),
+		["b"] = textMeshNest.lowercase:WaitForChild("Meshes_low__b"),
+		["c"] = textMeshNest.lowercase:WaitForChild("Meshes_low__c"),
+		["d"] = textMeshNest.lowercase:WaitForChild("Meshes_low__d"),
+		["e"] = textMeshNest.lowercase:WaitForChild("Meshes_low__e"),
+		["f"] = textMeshNest.lowercase:WaitForChild("Meshes_low__f"),
+		["g"] = textMeshNest.lowercase:WaitForChild("Meshes_low__g"),
+		["h"] = textMeshNest.lowercase:WaitForChild("Meshes_low__h"),
+		["i"] = textMeshNest.lowercase:WaitForChild("Meshes_low__i"),
+		["j"] = textMeshNest.lowercase:WaitForChild("Meshes_low__j"),
+		["k"] = textMeshNest.lowercase:WaitForChild("Meshes_low__k"),
+		["l"] = textMeshNest.lowercase:WaitForChild("Meshes_low__l"),
+		["m"] = textMeshNest.lowercase:WaitForChild("Meshes_low__m"),
+		["n"] = textMeshNest.lowercase:WaitForChild("Meshes_low__n"),
+		["o"] = textMeshNest.lowercase:WaitForChild("Meshes_low__o"),
+		["p"] = textMeshNest.lowercase:WaitForChild("Meshes_low__p"),
+		["q"] = textMeshNest.lowercase:WaitForChild("Meshes_low__q"),
+		["r"] = textMeshNest.lowercase:WaitForChild("Meshes_low__r"),
+		["s"] = textMeshNest.lowercase:WaitForChild("Meshes_low__s"),
+		["t"] = textMeshNest.lowercase:WaitForChild("Meshes_low__t"),
+		["u"] = textMeshNest.lowercase:WaitForChild("Meshes_low__u"),
+		["v"] = textMeshNest.lowercase:WaitForChild("Meshes_low__v"),
+		["w"] = textMeshNest.lowercase:WaitForChild("Meshes_low__w"),
+		["x"] = textMeshNest.lowercase:WaitForChild("Meshes_low__x"),
+		["y"] = textMeshNest.lowercase:WaitForChild("Meshes_low__y"),
+		["z"] = textMeshNest.lowercase:WaitForChild("Meshes_low__z"),
 
 
 		["0"] = textMeshNest.number.Meshes__zero,
@@ -305,7 +304,7 @@ function displayText3D(prepTable: PrepTable, textArray: table)
 		["3"] = textMeshNest.number.Meshes__three,
 		["4"] = textMeshNest.number.Meshes__four,
 		["5"] = textMeshNest.number.Meshes__five,
-		-- ["6"] = textMeshNest.number.Meshes__six, -- Exist
+		["6"] = textMeshNest.number.Meshes__six,
 		["7"] = textMeshNest.number.Meshes__seven,
 		["8"] = textMeshNest.number.Meshes__eight,
 		["9"] = textMeshNest.number.Meshes__nine,
@@ -464,9 +463,11 @@ function displayText3D(prepTable: PrepTable, textArray: table)
 
 		lineNest.Name = lineNest.Name .. textArray[i]
 		currentTextMesh = currentTextMesh:Clone()
+		currentTextMesh.Material = Enum.Material.Neon
 		currentTextMesh.Anchored = true
 		currentTextMesh.CanCollide = false
 		currentTextMesh.CanTouch = false
+		currentTextMesh.Color = Color3.new(148, 147, 150)
 		currentTextMesh.Name = textArray[i] .. i
 
 		local Localhighlight = highlight:Clone()
@@ -500,8 +501,9 @@ function displayText3D(prepTable: PrepTable, textArray: table)
 		end
 		
 		-- Make them invisible, as we want to use textAnimateHandler to handle the animation
-		-- currentTextMesh.Transparency = 1
-		-- localIGTC.Enabled = false
+		currentTextMesh.Transparency = 1
+		localIGTC.Enabled = false
+		localText.Transparency = 1
 
 		i += 1
 
@@ -523,7 +525,7 @@ function displayText3D(prepTable: PrepTable, textArray: table)
 		)
 	)
 
-	textAnimateHandler({prepTable.AppearStyle, prepTable.EndStyle, #textArray * 0.07, prepTable.AnimationTiming}, lineNest:GetChildren())
+	textAnimateHandler(prepTable, #textArray * 0.1, lineNest:GetChildren())
 
 	-- return true
 end
@@ -532,24 +534,9 @@ end
 -- Strats:
 -- 1. call textAnimateHandler once texts are being aligned properly (desync)
 -- 2. Perform various AppearStyle/EndStyle
-function textAnimateHandler(animateData: table ,textItem: table) -- TODO: Convert to ModuleScript
-	-- animateData: { AppearStyle, EndStyle, timeBetweenStyle, animationTiming }
+function textAnimateHandler(prepTable: PrepTable, timeBetweenStyle: number ,textItem: table) -- TODO: Convert to ModuleScript
 	-- AppearStyle = 0: Normal (on sine), 1: Shaky, 2: Shrinking
 	-- EndStyle = 0: Normal, 1: Explode
-
-
-	
-	-- local animateRepo: table = {
-	-- 	AppearStyle = {
-	-- 		{TweenInfo.new(
-
-	-- 		)}
-	-- 	},
-	-- 	EndStyle = {
-
-	-- 	}
-	-- }
-
 
 	local tweenService = game:GetService("TweenService")
 	local textItemState = function(item) -- 0: 2D, 1: 3D
@@ -563,38 +550,67 @@ function textAnimateHandler(animateData: table ,textItem: table) -- TODO: Conver
 		end
 	end
 
-	print(animateData, textItem)
+	print(prepTable, textItem)
 
 	local normalStyle = TweenInfo.new(
-		animateData[4],
+		prepTable.AnimationTiming,
 		Enum.EasingStyle.Quart,
 		Enum.EasingDirection.Out,
 		0,
 		false,
 		0
 	)
-	if animateData[1] == 0 then
+
+	if prepTable.AppearStyle == 0 then
+		local cYOffset: number = 0.5
+		local rZOffset: number = 0.4
+		local sXOffset, sYOffset: number = 1.5, 1.5
 		for _, mesh: Instance in textItem do
-			task.wait(animateData[4])
-			local x, y, z = mesh.CFrame:ToOrientation()
-			mesh.CFrame = CFrame.new(mesh.CFrame.Position.X, mesh.CFrame.Position.Y + 0.5, mesh.CFrame.Position.Z) * CFrame.Angles(x,y,z - 0.2)
+			local rX, rY, rZ = mesh.CFrame:ToOrientation()
+			local sX, sY, sZ = mesh.Size.X, mesh.Size.Y, mesh.Size.Z
+			mesh.CFrame = CFrame.new(mesh.CFrame.Position.X, mesh.CFrame.Position.Y + cYOffset, mesh.CFrame.Position.Z) * CFrame.Angles(rX,rY,rZ - rZOffset)
+			mesh.Size = Vector3.new(sX + sXOffset, sY + sYOffset, sZ)
+			task.wait(prepTable[4])
+
+			local textTween = tweenService:Create(mesh, normalStyle, {
+				CFrame = CFrame.new(mesh.CFrame.Position.X, mesh.CFrame.Position.Y, mesh.CFrame.Position.Z) * CFrame.Angles(rX,rY,rZ),
+				Transparency = 0,
+				Size = Vector3.new(sX, sY, sZ)
+			})
+
+
+			local gradient = mesh:GetDescendants()[3] -- NOT UIGradient, but TextLabel
+			local gradientTween = tweenService:Create(gradient, normalStyle, {
+				TextTransparency = 0
+			})
+
+			textTween:Play()
+			mesh:FindFirstChild("SurfaceGui").Enabled = true
+			gradientTween:Play()
 		end
 	end -- TODO: Apply TweenService for animation (movement, visual)
 
-	task.wait(animateData[3]) -- Time between AppearStyle and EndStyle
-	if animateData[2] == 0 then
+	task.wait(timeBetweenStyle) -- Time between AppearStyle and EndStyle
+	
+	if prepTable.EndStyle == 0 then
 		local innerTextLineNest = textItem
-		for i1, innerLSTValue in ipairs(innerTextLineNest) do
-			task.wait(animateData[4])
+		for _, innerLSTValue: Instance in ipairs(innerTextLineNest) do
+			task.wait(prepTable.AnimationTiming)
 			innerLSTValue.Anchored = false
 			innerLSTValue.CanCollide = true
 			innerLSTValue.CanTouch = false
 		end
+		task.wait(timeBetweenStyle)
+		for _, text: Instance in ipairs(innerTextLineNest) do
+			task.wait(0.06)
+			text:Destroy()
+		end
 	end
 end
 
+
 main({
-	Text = "AAAaaaaAAAAAAaaAAAbC",
+	Text = "Hello everybody my name is Markiplier and welcome",
 	-- Gradient = {
 	-- 	Gradient1 = {0.768627, 0.321569, 0.443137},
 	-- 	Gradient2 = {0.427451, 0.494118, 0.784314}
@@ -603,7 +619,7 @@ main({
 	Placement = 2,
 	Character = 'Player',
 	AppearStyle = 0,
-	AnimationTiming = 0.1, -- The default is 0.03
+	AnimationTiming = 0.1, -- The default is 0.1
 	textXGap = 0.2,
 	textYGap = 0.5,
 	EndStyle = 0,
@@ -614,8 +630,7 @@ main({
 -- ...Do we need newline text? I swear I watched the replay and there were NO sign of newline text. They just create a new instance of the function to simulate newline.
 -- At least in 3D text generation, 2D does have some sort of newline system
 
--- Add more missing meshes
--- Fix some lowercase text behave stupid...
--- Fix textRepo somehow got affected with the loop (check cache)
--- Animation for AppearStyle
--- Animation for EndStyle, Destroy() mesh after being dropped
+-- Change 3D text mesh from existing in workspace as meshID (can be requested if only needed)
+-- Fix some lowercase text behave stupid... (for now every single texts are enforced to be uppercase-d)
+-- Animation for AppearStyle (0)
+-- Animation for EndStyle (0)
